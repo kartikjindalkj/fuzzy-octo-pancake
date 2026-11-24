@@ -76,6 +76,8 @@ Want a look without your own photos? Run `./start.sh --demo`.
 
 **Group by faces** (optional) runs separately, on your computer: it detects faces (InsightFace), turns each into a fingerprint, groups the ones that match (DBSCAN), and copies each person's photos into their own folder under `<your folder> (people)`. The clearest face in each group becomes its thumbnail. Unsure faces go to a review queue. You review, name, merge and fix everything in the dashboard — no faces leave your computer.
 
+The first time you press **Group by faces**, the dashboard downloads the extra libraries it needs (a few hundred MB) and shows the progress, then groups. After that it's instant to start. These libraries are kept out of the basic setup so a plain sort stays a small, quick install; you can also install them ahead of time with `./setup-faces.sh`.
+
 ### Claude or Jev?
 
 | | Claude (default) | Jev (Advanced, optional) |
@@ -96,6 +98,7 @@ Want a look without your own photos? Run `./start.sh --demo`.
 ```bash
 ./setup.sh          # once: Python packages into .venv/
 ./start.sh          # opens http://127.0.0.1:8765
+./setup-faces.sh    # optional: libraries for Group by faces (the dashboard also installs these on first use)
 ```
 
 Every step is also a script in `scripts/` (`scan.py`, `dupes.py`, `label_claude.py`, `label_jev.py`, `apply.py`, and `faces.py` for face grouping). Agents read `CLAUDE.md` (or `AGENTS.md`) for the full playbook. Needs Python 3.9+, and ffmpeg for video previews (`brew install ffmpeg`).

@@ -6,7 +6,7 @@ build folders) with live progress, edit folders, browse photos at full size, mov
 photo to another folder, and open folders in Finder.
 Listens on 127.0.0.1 only: nothing is reachable from other computers.
 """
-import glob, hashlib, io, json, mimetypes, os, random, re, shutil, subprocess, sys, threading, time, urllib.parse
+import glob, hashlib, importlib.util, io, json, mimetypes, os, random, re, shutil, subprocess, sys, threading, time, urllib.parse
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -22,6 +22,14 @@ job = {"step": None, "running": False, "log": [], "code": None, "phase": None, "
        "started": None, "phase_started": None, "timings": {}}
 
 
+FACES_REQ = os.path.join(ROOT, "requirements-faces.txt")
+
+
+def faces_ready():
+    """Are the (heavy, optional) face-grouping libraries installed in this venv?"""
+    return all(importlib.util.find_spec(m) for m in ("numpy", "insightface", "onnxruntime", "sklearn"))
+
+
 def has_jev_key():
     if os.environ.get("JEV_KEY") or os.environ.get("TYPESAFE_API_KEY"):
         return True
@@ -35,6 +43,7 @@ def state():
     claude_files = glob.glob(os.path.join(LABELS, "*.json"))
     return {
         "people_ready": os.path.exists(os.path.join(people_root(src), "faces.json")),
+        "faces_deps": faces_ready(),
         "categories": load(CATEGORIES, []),
         "source": src.get("source"), "limit": src.get("limit"), "sorted": src.get("sorted"),
         "files": len(inv), "bytes": sum(r["bytes"] for r in inv),
@@ -179,9 +188,12 @@ def run_faces(args):
     save(os.path.join(DATA, "source.json"), src)
 
     def body():
+        if not faces_ready():  # first use on this computer: fetch the optional face libraries
+            if run_phase("install", ["-m", "pip", "install", "-r", FACES_REQ]):
+                return job.update(running=False, code=1, phase="install")
         code = run_phase("faces", [os.path.join(SCRIPTS, "faces.py"), source, dest])
         job.update(running=False, code=code, phase="done" if code == 0 else "faces")
-    start_job("faces", ["faces"], body)
+    start_job("faces", (["install"] if not faces_ready() else []) + ["faces"], body)
 
 
 PTHUMBS = os.path.join(WORK, "pthumbs")

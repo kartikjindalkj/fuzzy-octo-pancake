@@ -1,0 +1,6 @@
+# Extra libraries for "Group by faces" only. Installed on first use (or run ./setup-faces.sh).
+# Kept out of requirements.txt so the basic sort stays a small, fast install.
+numpy>=1.24
+insightface>=0.7
+onnxruntime>=1.16
+scikit-learn>=1.3

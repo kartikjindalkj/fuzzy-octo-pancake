@@ -737,12 +737,15 @@ let facesPoll;
 async function groupFaces() {
   if (DEMO) return toast("This is the demo. Run ./start.sh on your own photos to group faces.");
   if (S.job && S.job.running) return toast("Something is already running. Wait for it to finish.");
-  toast("Grouping by face on your computer. First run sets up the model; this can take a few minutes.");
+  toast(S.faces_deps
+    ? "Grouping by face on your computer. First run sets up the model; this can take a few minutes."
+    : "First time: setting up the face tools on your computer (a one-time download, a few minutes), then grouping. Nothing is uploaded.");
   try { await api("/api/faces", {}); } catch (e) { return; }
   clearInterval(facesPoll);
   facesPoll = setInterval(async () => {
     let s; try { s = await fetch("/api/state", { cache: "no-store" }).then(r => r.json()); } catch (e) { return; }
     S = s; const j = s.job || {};
+    if (j.phase === "install" && j.running) setPill("busy", "Setting up face tools…");
     if (j.phase === "faces" && j.running) setPill("busy", j.total ? `Grouping faces ${Math.round(j.done / j.total * 100)}%` : "Grouping faces…");
     if (!j.running) {
       clearInterval(facesPoll);
@@ -904,7 +907,8 @@ function renderPeople(mf) {
 
 function startGrouping() {
   const where = S.source ? `\n\nFolder: ${S.source}` : "";
-  if (!confirm(`Group photos by face?\n\nThis groups photos only from the folder you chose for sorting. It runs on your computer — nothing is uploaded.${where}`)) return;
+  const setup = S.faces_deps ? "" : "\n\nFirst time only: this downloads the face tools (a few hundred MB) before grouping.";
+  if (!confirm(`Group photos by face?\n\nThis groups photos only from the folder you chose for sorting. It runs on your computer — nothing is uploaded.${setup}${where}`)) return;
   groupFaces();
 }
 $("btnFaces").onclick = () => (S.people_ready ? openPeople() : startGrouping());
