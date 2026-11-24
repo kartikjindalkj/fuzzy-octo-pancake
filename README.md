@@ -41,16 +41,23 @@ It shows how long it usually takes, then sorts on its own while you watch every 
 - **iPhone or Apple Photos:** in Photos on your Mac, select all, then File > Export > Export Unmodified Originals, into a new folder.
 </details>
 
-## Using it again
+## Starting and stopping
 
-The dashboard lives at **http://127.0.0.1:8765** while it's running. To open it again later, either:
+The dashboard lives at **http://127.0.0.1:8765** while it's running, and keeps running in the background until you stop it.
+
+**To open it:**
 
 - double-click **Open Photo Sorter.command** in the project folder, or
 - tell Claude "open my photo sorter".
 
-It keeps running in the background until you stop it. To stop it, double-click **Stop Photo Sorter.command** (or tell Claude "stop my photo sorter"). Closing the browser tab only hides the page; it does not stop the app.
+**To stop it:**
 
-Press **New sort** to sort a different folder, or send the copies somewhere else.
+- double-click **Stop Photo Sorter.command** in the project folder, or
+- tell Claude "stop my photo sorter".
+
+> Closing the browser tab only hides the page — it does **not** stop the app. Use Stop Photo Sorter.command to actually turn it off.
+
+Once it's open, press **New sort** to sort a different folder, or send the copies somewhere else.
 
 ## The dashboard
 
@@ -59,13 +66,33 @@ Press **New sort** to sort a different folder, or send the copies somewhere else
 | **Sort with Claude** | Before sorting: asks for anything missing, then starts. After sorting: replays the animation (good for screen recording). Add `?d=20` to the address for a slower take. |
 | **New sort** | Pick a new photos folder and a new place for the copies. |
 | **Advanced** (in the setup card) | See the folders that will be made, remove any, or press **+** to add your own. Choose Claude or Jev. Try 200 photos first. |
-| **Group by faces** / **People** | Groups photos by the people in them, on your computer. Each person shows as a cropped face: name them, merge two groups that are the same person, delete a group (copies only — your originals stay), or sort the unsure ones in the review queue. |
+| **Group by faces** / **People** | Groups photos by the people in them, on your computer. Name, merge and delete groups and sort the unsure ones — see [Group photos by face](#group-photos-by-face) below. |
 | **Click a folder** | Browse everything in it. Click a photo to see it full size, flip with the arrow keys, and **Move to** another folder if it's wrong. |
 | **Edit folders** | Rename folders and describe what goes in each. |
 | **Open sorted folder** | Opens the result in Finder. |
 | ☀ / ☾ | Light or dark. |
 
 Want a look without your own photos? Run `./start.sh --demo`.
+
+## Group photos by face
+
+This is optional and runs entirely on your computer — no faces are uploaded. It finds the people who show up again and again and gathers each person's photos together.
+
+**1. Start it.** After sorting, press **Group by faces** (top of the dashboard). The first time, it downloads the face tools (a few hundred MB, one time) and shows the progress, then groups. When it's done, the **People** view opens.
+
+**2. Review each person.** Every person is shown as a **cropped photo of their face** (the group's clearest face), with the number of photos. Click a person to see all their photos; click any photo to view it full size.
+
+Inside a person, or on their tile, you can:
+
+- **Name** — give the person a real name. The name sticks, and their folder on disk is renamed to match.
+- **Merge** — if the same person was split into two groups, open one and press **Merge**, then pick the other. Their photos join and the duplicate group goes away. (Tip: because each group shows its own face, check the two faces really are the same person before merging.)
+- **Delete group** — open a group and press **Delete group** to remove a grouping you don't want. This deletes only the face-grouped **copies** — your original photos are never touched.
+
+**3. Sort the unsure ones.** Faces the tool wasn't confident about go to a **Review** row. For each one, assign it to the right person or **Dismiss** it.
+
+**4. Re-group** (optional) rebuilds all the groups from scratch. Your names are kept; merges and review fixes are cleared. **Open in Finder** shows the person folders on disk.
+
+The grouped photos live in `<your folder> (people)/_People/<name>/`. On a Mac these are space-free copies, so grouping doesn't double your storage.
 
 ## How it works
 
